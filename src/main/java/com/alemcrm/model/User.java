@@ -69,6 +69,4 @@ public class User {
         this.role = role;
     }
 
-    // Você pode sobrescrever toString(), equals() e hashCode() se quiser
-
 }
