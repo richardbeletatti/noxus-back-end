@@ -5,35 +5,50 @@ import com.alemcrm.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.Transactional;
 
 @Configuration
 public class DataInitializer {
 
-	@Bean
-	public CommandLineRunner initData(UserRepository userRepository) {
-	    return args -> {
-	        if (userRepository.findByEmail("admin@noxus.com").isEmpty()) {
-	            User admin = new User();
-	            admin.setName("Administrador");
-	            admin.setEmail("admin@noxus.com");
-	            admin.setPassword("admin");
-	            admin.setRole("admin");
+    @Bean
+    @Transactional
+    public CommandLineRunner initData(UserRepository userRepository) {
+        return args -> {
+            try {
+                createUserIfNotExists(userRepository, 
+                    "Administrador", 
+                    "admin@noxus.com", 
+                    "admin123",  // Nunca use senhas fracas em produção!
+                    "admin"
+                );
 
-	            userRepository.save(admin);
-	            System.out.println("Usuário admin criado.");
-	        }
+                createUserIfNotExists(userRepository,
+                    "Usuário Comum",
+                    "usuario@noxus.com",
+                    "user123",
+                    "user"
+                );
+            } catch (Exception e) {
+                System.err.println("Erro na inicialização de dados: ");
+                e.printStackTrace();
+            }
+        };
+    }
 
-	        if (userRepository.findByEmail("usuario@noxus.com").isEmpty()) {
-	            User user = new User();
-	            user.setName("Usuário Comum");
-	            user.setEmail("usuario@noxus.com");
-	            user.setPassword("usuario");
-	            user.setRole("user");
-
-	            userRepository.save(user);
-	            System.out.println("Usuário comum criado.");
-	        }
-	    };
-	}
-
+    private void createUserIfNotExists(UserRepository repository, 
+                                     String name, 
+                                     String email, 
+                                     String password, 
+                                     String role) {
+        if (repository.findByEmail(email).isEmpty()) {
+            User user = new User();
+            user.setName(name);
+            user.setEmail(email);
+            user.setPassword(password); // Deveria ser um hash na prática!
+            user.setRole(role);
+            
+            repository.save(user);
+            System.out.println("Usuário criado: " + email);
+        }
+    }
 }
