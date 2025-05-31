@@ -9,9 +9,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Configuration
 public class AuthFilter extends OncePerRequestFilter {
@@ -56,23 +60,21 @@ public class AuthFilter extends OncePerRequestFilter {
             System.out.println("🔍 Token recebido: " + token);
             
             final Claims claims = TokenUtil.decodeToken(token);
+            
             final String email = claims.getSubject();
             final String role = claims.get("role", String.class);
+
+            // Cria a autoridade no formato esperado pelo Spring Security
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
+
+            // Cria Authentication com a autoridade
+            UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
+
+            // Define no contexto do Spring Security
+            SecurityContextHolder.getContext().setAuthentication(authToken);
             
             System.out.println("👤 Usuário autenticado - Email: " + email + " | Role: " + role);
-
-            // Verificação de permissões
-            if (path.startsWith("/admin") && !"admin".equalsIgnoreCase(role)) {
-                System.out.println("⛔ Acesso negado: Rota admin requer role ADMIN");
-                sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acesso negado: somente administradores");
-                return;
-            }
-
-            if (path.startsWith("/user") && !("user".equalsIgnoreCase(role) || "admin".equalsIgnoreCase(role))) {
-                System.out.println("⛔ Acesso negado: Rota user requer role USER ou ADMIN");
-                sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acesso negado: somente usuários comuns");
-                return;
-            }
 
             // Adiciona atributos para uso posterior
             request.setAttribute("userEmail", email);

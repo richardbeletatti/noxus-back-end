@@ -69,14 +69,13 @@
       <version>${jjwt.version}</version>
       <scope>runtime</scope>
     </dependency>
-
-    <!-- Spring Boot DevTools (optional, para dev) -->
+    
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <scope>runtime</scope>
-      <optional>true</optional>
-    </dependency>
+    	<groupId>org.postgresql</groupId>
+    	<artifactId>postgresql</artifactId>
+    	<version>42.6.0</version>
+	</dependency>
+
 
     <!-- Spring Boot Starter Test -->
     <dependency>
@@ -91,6 +90,7 @@
       <artifactId>junit-platform-launcher</artifactId>
       <scope>test</scope>
     </dependency>
+  
   </dependencies>
 
   <build>
