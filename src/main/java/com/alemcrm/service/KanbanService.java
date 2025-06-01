@@ -29,6 +29,12 @@ public class KanbanService {
         this.userRepo = userRepo;
     }
     
+    public List<KanbanColumnDTO> getAllColumns() {
+        List<KanbanColumn> columns = columnRepo.findAll();
+        return columns.stream().map(KanbanColumnDTO::new).toList();
+    }
+
+    
     public List<KanbanColumnDTO> getAllColumnsForUser(Long userId) {
         List<KanbanColumn> columns = columnRepo.findByUserId(userId);
         return columns.stream()

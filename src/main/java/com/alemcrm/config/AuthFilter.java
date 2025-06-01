@@ -63,20 +63,18 @@ public class AuthFilter extends OncePerRequestFilter {
             
             final String email = claims.getSubject();
             final String role = claims.get("role", String.class);
+            final Long id = claims.get("id", Long.class);
 
-            // Cria a autoridade no formato esperado pelo Spring Security
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
 
-            // Cria Authentication com a autoridade
             UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
 
-            // Define no contexto do Spring Security
             SecurityContextHolder.getContext().setAuthentication(authToken);
             
-            System.out.println("👤 Usuário autenticado - Email: " + email + " | Role: " + role);
+            System.out.println("Usuário autenticado - Email: " + email + " | Role: " + role + " | ID: " + id);
 
-            // Adiciona atributos para uso posterior
+            request.setAttribute("userId", id);
             request.setAttribute("userEmail", email);
             request.setAttribute("userRole", role);
 

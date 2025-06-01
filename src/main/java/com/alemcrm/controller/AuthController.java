@@ -36,8 +36,8 @@ public class AuthController {
             if (user.getPassword().equals(password)) {
                 System.out.println("Senha correta!");
 
-                // Gerar o JWT real
-                String token = TokenUtil.generateToken(user.getEmail(), user.getRole());
+                String token = TokenUtil.generateToken(user.getId(), 
+                		user.getEmail(), user.getRole());
 
                 Map<String, String> response = new HashMap<>();
                 response.put("token", token);

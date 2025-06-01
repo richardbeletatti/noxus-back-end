@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,6 +50,19 @@ public class AdminController {
         User user = optionalUser.get();
         UserDTO dto = new UserDTO(user);
         return ResponseEntity.ok(dto);
+    }
+    
+    @PostMapping("/create-account")
+    public ResponseEntity<?> createUser(@RequestBody UserDTO userDto) {
+        try {
+            User createdUser = adminService.createUser(userDto);
+            return ResponseEntity.ok(createdUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao criar usuário");
+        }
     }
 
 }

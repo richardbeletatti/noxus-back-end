@@ -20,15 +20,15 @@ import com.alemcrm.service.KanbanService;
 
 @RestController
 @RequestMapping("admin/kanban")
-public class KanbanController {
+public class AdminKanbanController {
 
     private final KanbanService kanbanService;
 
-    public KanbanController(KanbanService kanbanService) {
+    public AdminKanbanController(KanbanService kanbanService) {
         this.kanbanService = kanbanService;
     }
     
-    @GetMapping("/users/{id}/columns")
+    @GetMapping("/users/{id}/columns") 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<List<KanbanColumnDTO>> getAllColumnsForUser(
     		@PathVariable("id") Long userId) {
@@ -40,6 +40,7 @@ public class KanbanController {
     public ResponseEntity<KanbanColumnDTO> createColumnForUser(
     		@PathVariable("id") Long userId,
             @RequestBody KanbanColumn column) {
+    	System.out.println("Recebido: " + column);
         return ResponseEntity.ok(kanbanService.createColumnForUser(userId, column));
     }
 
