@@ -6,9 +6,12 @@ import java.util.Objects;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -20,6 +23,10 @@ public class KanbanColumn {
     private Long id;
 
     private String name;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<KanbanCard> cards = new ArrayList<>();
@@ -30,6 +37,14 @@ public class KanbanColumn {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public User getUser() {
+	    return user;
+	}
+
+	public void setUser(User user) {
+	    this.user = user;
 	}
 
 	public String getName() {

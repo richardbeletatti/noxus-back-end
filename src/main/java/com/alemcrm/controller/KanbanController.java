@@ -27,24 +27,31 @@ public class KanbanController {
     public KanbanController(KanbanService kanbanService) {
         this.kanbanService = kanbanService;
     }
-
-    @PostMapping("/columns")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<KanbanColumnDTO> createColumn(@RequestBody KanbanColumn column) {
-        return ResponseEntity.ok(kanbanService.createColumn(column));
-    }
-
-    @DeleteMapping("/columns/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteColumn(@PathVariable("id") Long id) {
-        kanbanService.deleteColumn(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/columns")
+    
+    @GetMapping("/users/{id}/columns")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<List<KanbanColumnDTO>> getAllColumns() {
-        return ResponseEntity.ok(kanbanService.getAllColumns());
+    public ResponseEntity<List<KanbanColumnDTO>> getAllColumnsForUser(
+    		@PathVariable("id") Long userId) {
+        return ResponseEntity.ok(kanbanService.getAllColumnsForUser(userId));
+    }
+
+    @PostMapping("/users/{id}/columns")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<KanbanColumnDTO> createColumnForUser(
+    		@PathVariable("id") Long userId,
+            @RequestBody KanbanColumn column) {
+        return ResponseEntity.ok(kanbanService.createColumnForUser(userId, column));
+    }
+
+
+    @DeleteMapping("/users/{userId}/columns/{columnId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteColumnForUser(
+        @PathVariable("userId") Long userId, 
+        @PathVariable("columnId") Long columnId) {
+        
+        kanbanService.deleteColumnForUser(userId, columnId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/columns/{columnId}/cards")
