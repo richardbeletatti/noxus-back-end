@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.alemcrm.dto.KanbanCardDTO;
 import com.alemcrm.dto.KanbanColumnDTO;
 import com.alemcrm.model.KanbanCard;
+import com.alemcrm.model.KanbanColumn;
 import com.alemcrm.service.KanbanService;
 
 @RestController
@@ -28,22 +29,9 @@ public class UserKanbanController {
         return ResponseEntity.ok(kanbanService.getAllColumns());
     }
 
-//    @GetMapping("/columns/{columnId}/cards")
-//    @PreAuthorize("hasRole('USER')")
-//    public ResponseEntity<List<KanbanCardDTO>> getCardsForColumn(
-//            @PathVariable Long columnId,
-//            @RequestHeader("Authorization") String authHeader) {
-//        // Opcional: extrair userId do token e passar para o service
-//        return ResponseEntity.ok(kanbanService.getCardsForColumn(columnId));
-//    }
-
-    @PostMapping("/columns/{columnId}/cards")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<KanbanCardDTO> createCardForUser(
-            @PathVariable Long columnId,
-            @RequestBody KanbanCard card,
-            @RequestHeader("Authorization") String authHeader) {
-        return ResponseEntity.ok(kanbanService.createCard(columnId, card));
+    @PostMapping("/admin/kanban/columns/{columnId}/cards")
+    public KanbanCard createCard(@PathVariable Long columnId, @RequestBody KanbanCard cardData) {
+        return kanbanService.createCard(columnId, cardData);
     }
 
 }

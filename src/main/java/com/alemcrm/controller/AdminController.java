@@ -6,9 +6,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +33,7 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
         try {
-            List<User> users = adminService.findAll();
+            List<User> users = adminService.getAllRegularUsers();
             return ResponseEntity.ok(users);
         } catch (Exception e) {
             return ResponseEntity
@@ -65,4 +67,16 @@ public class AdminController {
         }
     }
 
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
+        adminService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @PutMapping("/users/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable("id") Long id, 
+    		@RequestBody User updatedUser) {
+        User user = adminService.updateUser(id, updatedUser);
+        return ResponseEntity.ok(user);
+    }
 }

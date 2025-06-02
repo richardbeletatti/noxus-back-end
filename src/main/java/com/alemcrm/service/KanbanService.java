@@ -65,12 +65,17 @@ public class KanbanService {
     }
 
 
-    public KanbanCardDTO createCard(Long columnId, KanbanCard card) {
+    public KanbanCard createCard(Long columnId, KanbanCard cardData) {
         KanbanColumn column = columnRepo.findById(columnId)
-                .orElseThrow(() -> new EntityNotFoundException("Coluna não encontrada"));
-        card.setColumn(column);
-        KanbanCard saved = cardRepo.save(card);
-        return toCardDTO(saved);
+            .orElseThrow(() -> new RuntimeException("Coluna não encontrada"));
+
+        KanbanCard newCard = new KanbanCard();
+        newCard.setTitle(cardData.getTitle());
+        newCard.setPhoneNumber(cardData.getPhoneNumber());
+        newCard.setConversationHistory(cardData.getConversationHistory());
+        newCard.setColumn(column);
+
+        return cardRepo.save(newCard);
     }
 
     private KanbanColumnDTO toColumnDTO(KanbanColumn column) {
@@ -84,5 +89,9 @@ public class KanbanService {
     private KanbanCardDTO toCardDTO(KanbanCard card) {
         return new KanbanCardDTO(card.getId(), card.getTitle(), card.getDescription());
     }
+
+	public Object findById(Long columnId) {
+		return cardRepo.findById(columnId);
+	}
 }
 

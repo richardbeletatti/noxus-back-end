@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -19,10 +20,14 @@ public class KanbanCard {
 
     private String title;
     private String description;
-
+    private String phoneNumber;
+    
     @ManyToOne
     @JoinColumn(name = "column_id")
     private KanbanColumn column;
+    
+    @Lob
+    private String conversationHistory;
 
 	public Long getId() {
 		return id;
@@ -71,6 +76,22 @@ public class KanbanCard {
 			return false;
 		KanbanCard other = (KanbanCard) obj;
 		return Objects.equals(id, other.id);
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getConversationHistory() {
+		return conversationHistory;
+	}
+
+	public void setConversationHistory(String conversationHistory) {
+		this.conversationHistory = conversationHistory;
 	}
 
 }

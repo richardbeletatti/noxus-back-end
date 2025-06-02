@@ -1,5 +1,8 @@
 package com.alemcrm.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -25,6 +28,9 @@ public class User {
     @Column(nullable = false)
     private String role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KanbanColumn> columns = new ArrayList<>();
+    
     public User() {}
 
     public User(String name, String email, String password, String role) {

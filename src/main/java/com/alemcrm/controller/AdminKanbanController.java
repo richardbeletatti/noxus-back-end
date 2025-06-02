@@ -57,7 +57,7 @@ public class AdminKanbanController {
 
     @PostMapping("/columns/{columnId}/cards")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<KanbanCardDTO> createCard(
+    public ResponseEntity<KanbanCard> createCard(
             @PathVariable Long columnId,
             @RequestBody KanbanCard card) {
         return ResponseEntity.ok(kanbanService.createCard(columnId, card));
