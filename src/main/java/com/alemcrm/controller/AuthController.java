@@ -40,7 +40,6 @@ public class AuthController {
             User user = userOpt.get();
             System.out.println("Usuário encontrado: " + user.getEmail());
 
-            // Agora usa o passwordEncoder para comparar!
             if (passwordEncoder.matches(password, user.getPassword())) {
                 System.out.println("Senha correta!");
 
