@@ -21,10 +21,12 @@ public class AuthController {
 
     private final UserService userService;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final TokenUtil tokenUtil;
 
-    public AuthController(UserService userService, BCryptPasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService, BCryptPasswordEncoder passwordEncoder, TokenUtil tokenUtil) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.tokenUtil = tokenUtil;
     }
 
     @PostMapping("/login")
@@ -43,8 +45,8 @@ public class AuthController {
             if (passwordEncoder.matches(password, user.getPassword())) {
                 System.out.println("Senha correta!");
 
-                String token = TokenUtil.generateToken(user.getId(),
-                        user.getEmail(), user.getRole());
+                String token = tokenUtil.generateToken(user.getId(), user.getEmail(), user.getRole());
+
 
                 Map<String, String> response = new HashMap<>();
                 response.put("token", token);

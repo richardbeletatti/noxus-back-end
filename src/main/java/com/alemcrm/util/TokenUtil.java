@@ -4,17 +4,30 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
+@Component
 public class TokenUtil {
 
-    private static final String SECRET = "gD93!kLm#2pZr7TnW@8xUeQv$4HsJcNb";
-    private static final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
-    private static final long EXPIRATION_TIME = 86400000; // One day in milliseconds
+	   @Value("${jwt.secret}")
+	    private String jwtSecret;
 
-    public static String generateToken(Long id, String email, String role) {
+	    private Key SECRET_KEY;
+	    private static final long EXPIRATION_TIME = 86400000;
+
+	    @PostConstruct
+	    public void init() {
+	        this.SECRET_KEY = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret));
+	    }
+	    
+    public String generateToken(Long id, String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
@@ -25,19 +38,24 @@ public class TokenUtil {
                 .compact();
     }
 
-    public static Claims decodeToken(String token) {
+    public Claims decodeToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
+    
+    public Long getUserIdFromToken(String token) {
+        return decodeToken(token).get("id", Long.class);
+    }
 
-    public static String getEmailFromToken(String token) {
+
+    public String getEmailFromToken(String token) {
         return decodeToken(token).getSubject();
     }
 
-    public static String getRoleFromToken(String token) {
+    public String getRoleFromToken(String token) {
         return decodeToken(token).get("role", String.class);
     }
 }

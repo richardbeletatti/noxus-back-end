@@ -8,44 +8,48 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
 
-@Configuration
+@Component
 public class AuthFilter extends OncePerRequestFilter {
+
+    private final TokenUtil tokenUtil;
+
+    public AuthFilter(TokenUtil tokenUtil) {
+        this.tokenUtil = tokenUtil;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  FilterChain filterChain) throws ServletException, IOException {
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-    	System.out.println("🚨 ROTA INTERCEPTADA: " + request.getRequestURI());
-    	
-    	response.setHeader("Access-Control-Allow-Origin", "*");
-    	response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    	response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-    	response.setHeader("Access-Control-Expose-Headers", "Authorization");
-    	
+        System.out.println("🚨 ROTA INTERCEPTADA: " + request.getRequestURI());
+
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        response.setHeader("Access-Control-Expose-Headers", "Authorization");
+
         final String path = request.getRequestURI();
         final String method = request.getMethod();
 
         System.out.println("\n🚨 [AuthFilter] Iniciando filtro para: " + path + 
         		" | Método: " + method);
 
-        // Rotas públicas
         if (isPublicRoute(path, method)) {
             System.out.println("🟢 Rota pública - acesso liberado");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Verificação do token
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -58,9 +62,9 @@ public class AuthFilter extends OncePerRequestFilter {
 
         try {
             System.out.println("🔍 Token recebido: " + token);
-            
-            final Claims claims = TokenUtil.decodeToken(token);
-            
+
+            final Claims claims = tokenUtil.decodeToken(token); // <- uso da instância injetada
+
             final String email = claims.getSubject();
             final String role = claims.get("role", String.class);
             final Long id = claims.get("id", Long.class);
@@ -71,8 +75,6 @@ public class AuthFilter extends OncePerRequestFilter {
                 new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
-            
-            System.out.println("Usuário autenticado - Email: " + email + " | Role: " + role + " | ID: " + id);
 
             request.setAttribute("userId", id);
             request.setAttribute("userEmail", email);
