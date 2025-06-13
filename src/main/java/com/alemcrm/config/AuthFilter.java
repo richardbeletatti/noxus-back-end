@@ -63,7 +63,7 @@ public class AuthFilter extends OncePerRequestFilter {
         try {
             System.out.println("🔍 Token recebido: " + token);
 
-            final Claims claims = tokenUtil.decodeToken(token); // <- uso da instância injetada
+            final Claims claims = tokenUtil.decodeToken(token);
 
             final String email = claims.getSubject();
             final String role = claims.get("role", String.class);

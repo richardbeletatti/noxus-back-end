@@ -7,6 +7,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.alemcrm.dto.KanbanColumnDTO;
+import com.alemcrm.dto.KanbanCardDTO;
+import com.alemcrm.dto.KanbanCardRequestDTO;
 import com.alemcrm.model.KanbanCard;
 import com.alemcrm.service.KanbanService;
 import com.alemcrm.util.TokenUtil;
@@ -32,8 +34,10 @@ public class UserKanbanController {
         return ResponseEntity.ok(kanbanService.getAllColumnsForUser(userId));
     }
 
-    @PostMapping("/admin/kanban/columns/{columnId}/cards")
-    public KanbanCard createCard(@PathVariable Long columnId, @RequestBody KanbanCard cardData) {
-        return kanbanService.createCard(columnId, cardData);
+    @PostMapping("/cards")
+    @PreAuthorize("hasRole('USER')") // ou admin, conforme sua regra
+    public ResponseEntity<KanbanCardDTO> createCard(@RequestBody KanbanCardRequestDTO dto) {
+        KanbanCard card = kanbanService.createCardFromDTO(dto);
+        return ResponseEntity.ok(new KanbanCardDTO(card));
     }
 }

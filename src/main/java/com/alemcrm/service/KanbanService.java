@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.alemcrm.dto.KanbanCardDTO;
+import com.alemcrm.dto.KanbanCardRequestDTO;
 import com.alemcrm.dto.KanbanColumnDTO;
 import com.alemcrm.model.KanbanCard;
 import com.alemcrm.model.KanbanColumn;
@@ -12,8 +13,6 @@ import com.alemcrm.model.User;
 import com.alemcrm.repository.KanbanCardRepository;
 import com.alemcrm.repository.KanbanColumnRepository;
 import com.alemcrm.repository.UserRepository;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class KanbanService {
@@ -64,19 +63,20 @@ public class KanbanService {
         columnRepo.deleteById(columnId);
     }
 
-
-    public KanbanCard createCard(Long columnId, KanbanCard cardData) {
-        KanbanColumn column = columnRepo.findById(columnId)
+    public KanbanCard createCardFromDTO(KanbanCardRequestDTO dto) {
+        KanbanColumn column = columnRepo.findById(dto.getColumnId())
             .orElseThrow(() -> new RuntimeException("Coluna não encontrada"));
 
-        KanbanCard newCard = new KanbanCard();
-        newCard.setTitle(cardData.getTitle());
-        newCard.setPhoneNumber(cardData.getPhoneNumber());
-        newCard.setConversationHistory(cardData.getConversationHistory());
-        newCard.setColumn(column);
+        KanbanCard card = new KanbanCard();
+        card.setTitle(dto.getTitle());
+        card.setDescription(dto.getDescription());
+        card.setPhoneNumber(dto.getPhoneNumber());
+        card.setConversationHistory(dto.getConversationHistory());
+        card.setColumn(column);
 
-        return cardRepo.save(newCard);
+        return cardRepo.save(card);
     }
+
 
     private KanbanColumnDTO toColumnDTO(KanbanColumn column) {
         List<KanbanCardDTO> cardDTOs = column.getCards().stream()

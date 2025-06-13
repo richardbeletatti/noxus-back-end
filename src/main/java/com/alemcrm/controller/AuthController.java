@@ -45,8 +45,8 @@ public class AuthController {
             if (passwordEncoder.matches(password, user.getPassword())) {
                 System.out.println("Senha correta!");
 
-                String token = tokenUtil.generateToken(user.getId(), user.getEmail(), user.getRole());
-
+                String token = tokenUtil.generateToken(user.getId(), user.getEmail(),user.getName(),
+                		user.getRole());
 
                 Map<String, String> response = new HashMap<>();
                 response.put("token", token);
