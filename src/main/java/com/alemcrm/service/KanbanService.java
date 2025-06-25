@@ -1,5 +1,6 @@
 package com.alemcrm.service;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +14,9 @@ import com.alemcrm.model.User;
 import com.alemcrm.repository.KanbanCardRepository;
 import com.alemcrm.repository.KanbanColumnRepository;
 import com.alemcrm.repository.UserRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class KanbanService {
@@ -33,9 +37,8 @@ public class KanbanService {
         return columns.stream().map(KanbanColumnDTO::new).toList();
     }
 
-    
     public List<KanbanColumnDTO> getAllColumnsForUser(Long userId) {
-        List<KanbanColumn> columns = columnRepo.findByUserId(userId);
+    	List<KanbanColumn> columns = columnRepo.findByUserIdWithCards(userId);
         return columns.stream()
                       .map(this::toColumnDTO)
                       .toList();
@@ -50,7 +53,6 @@ public class KanbanService {
         KanbanColumn saved = columnRepo.save(column);
         return toColumnDTO(saved);
     }
-
 
     public void deleteColumnForUser(Long userId, Long columnId) {
         KanbanColumn column = columnRepo.findById(columnId)
@@ -71,12 +73,10 @@ public class KanbanService {
         card.setTitle(dto.getTitle());
         card.setDescription(dto.getDescription());
         card.setPhoneNumber(dto.getPhoneNumber());
-        card.setConversationHistory(dto.getConversationHistory());
         card.setColumn(column);
 
         return cardRepo.save(card);
     }
-
 
     private KanbanColumnDTO toColumnDTO(KanbanColumn column) {
         List<KanbanCardDTO> cardDTOs = column.getCards().stream()
@@ -87,11 +87,28 @@ public class KanbanService {
     }
 
     private KanbanCardDTO toCardDTO(KanbanCard card) {
-        return new KanbanCardDTO(card.getId(), card.getTitle(), card.getDescription());
+        return new KanbanCardDTO(card);
     }
 
-	public Object findById(Long columnId) {
-		return cardRepo.findById(columnId);
-	}
-}
+    public KanbanCard findCardById(Long cardId) {
+        return cardRepo.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card não encontrado"));
+    }
+	
+    @Transactional
+    public void deleteCardForUser(Long cardId, Long userId) throws AccessDeniedException {
+        KanbanCard card = cardRepo.findById(cardId)
+            .orElseThrow(() -> new EntityNotFoundException("Card não encontrado"));
 
+        if (!card.getColumn().getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Você não tem permissão para deletar este card");
+        }
+
+        KanbanColumn column = card.getColumn();
+        column.getCards().remove(card);
+
+        cardRepo.delete(card);
+    }
+
+
+}

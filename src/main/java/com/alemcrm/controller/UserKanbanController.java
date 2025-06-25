@@ -1,5 +1,6 @@
 package com.alemcrm.controller;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -34,10 +35,38 @@ public class UserKanbanController {
         return ResponseEntity.ok(kanbanService.getAllColumnsForUser(userId));
     }
 
-    @PostMapping("/cards")
-    @PreAuthorize("hasRole('USER')") // ou admin, conforme sua regra
-    public ResponseEntity<KanbanCardDTO> createCard(@RequestBody KanbanCardRequestDTO dto) {
-        KanbanCard card = kanbanService.createCardFromDTO(dto);
-        return ResponseEntity.ok(new KanbanCardDTO(card));
+    @PostMapping("/columns/{columnId}/cards")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<KanbanCardDTO> createCardForUser(
+    		@PathVariable("columnId") Long columnId,
+            @RequestBody KanbanCardRequestDTO dto,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = tokenUtil.getUserIdFromToken(token);
+
+        dto.setColumnId(columnId);
+
+        KanbanCard savedCard = kanbanService.createCardFromDTO(dto);
+
+        return ResponseEntity.ok(new KanbanCardDTO(savedCard));
+    }
+
+    @DeleteMapping("/cards/{cardId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> deleteCardForUser(
+            @PathVariable("cardId") Long cardId,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.replace("Bearer ", "");
+        Long userId = tokenUtil.getUserIdFromToken(token);
+
+        try {
+			kanbanService.deleteCardForUser(cardId, userId);
+		} catch (AccessDeniedException e) {
+			e.printStackTrace();
+		}
+
+        return ResponseEntity.noContent().build();
     }
 }

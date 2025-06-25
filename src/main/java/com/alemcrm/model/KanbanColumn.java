@@ -28,7 +28,7 @@ public class KanbanColumn {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<KanbanCard> cards = new ArrayList<>();
 
 	public Long getId() {

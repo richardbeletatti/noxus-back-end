@@ -55,12 +55,12 @@ public class AdminKanbanController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/columns/{columnId}/cards")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<KanbanCard> createCard(
-            @PathVariable Long columnId,
-            @RequestBody KanbanCard card) {
-        return ResponseEntity.ok(kanbanService.createCard(columnId, card));
-    }
+//    @PostMapping("/columns/{columnId}/cards")
+//    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+//    public ResponseEntity<KanbanCard> createCard(
+//            @PathVariable Long columnId,
+//            @RequestBody KanbanCard card) {
+//        return ResponseEntity.ok(kanbanService.createCard(columnId, card));
+//    }
 }
 

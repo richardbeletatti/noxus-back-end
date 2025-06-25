@@ -1,11 +1,9 @@
 package com.alemcrm.dto;
 
-//  used to create a card
 public class KanbanCardRequestDTO {
     private String title;
     private String description;
     private String phoneNumber;
-    private String conversationHistory;
     private Long columnId;
 
     public String getTitle() {
@@ -30,14 +28,6 @@ public class KanbanCardRequestDTO {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-    }
-
-    public String getConversationHistory() {
-        return conversationHistory;
-    }
-
-    public void setConversationHistory(String conversationHistory) {
-        this.conversationHistory = conversationHistory;
     }
 
     public Long getColumnId() {
