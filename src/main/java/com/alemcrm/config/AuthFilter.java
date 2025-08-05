@@ -99,6 +99,8 @@ public class AuthFilter extends OncePerRequestFilter {
     private boolean isPublicRoute(String path, String method) {
         return path.equals("/auth/login") || 
                path.startsWith("/h2-console") || 
+               path.startsWith("/webhook") ||  
+               path.equals("/api/bot/save") ||
                method.equalsIgnoreCase("OPTIONS");
     }
 
