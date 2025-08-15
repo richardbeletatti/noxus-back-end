@@ -2,6 +2,7 @@ package com.alemcrm.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,23 +11,44 @@ import org.springframework.web.bind.annotation.*;
 
 import com.alemcrm.dto.BotConfigDTO;
 import com.alemcrm.dto.IntentDTO;
+import com.alemcrm.model.BotConfig;
 import com.alemcrm.model.Intent;
 import com.alemcrm.model.Question;
+import com.alemcrm.repository.BotConfigRepository;
 import com.alemcrm.repository.IntentRepository;
 
 @RestController
 @RequestMapping("/api/bot")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true") // ajuste conforme necessário
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class BotController {
 
     @Autowired
     private IntentRepository intentRepository;
 
+    @Autowired
+    private BotConfigRepository botConfigRepository;
+
+    private String normalizePhoneNumber(String number) {
+        if (number == null) return null;
+        String cleaned = number.replaceAll("[^\\d+]", "");
+        if (!cleaned.matches("^\\+\\d{10,15}$")) {
+            throw new IllegalArgumentException("Número de telefone inválido: " + number);
+        }
+        return cleaned;
+    }
+
     @PostMapping("/save")
-    public ResponseEntity<?> saveBotConfig(@RequestBody BotConfigDTO botConfig) {
+    public ResponseEntity<?> saveBotConfig(@RequestBody BotConfigDTO botConfigDTO) {
+        try {
+            String normalizedNumber = normalizePhoneNumber(botConfigDTO.getWhatsappNumber());
+            botConfigDTO.setWhatsappNumber(normalizedNumber);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
         List<Intent> savedIntents = new ArrayList<>();
 
-        for (IntentDTO dto : botConfig.getIntents()) {
+        for (IntentDTO dto : botConfigDTO.getIntents()) {
             Intent intent = new Intent();
             intent.setName(dto.getName());
 
@@ -44,10 +66,13 @@ public class BotController {
             savedIntents.add(intentRepository.save(intent));
         }
 
-        // Se quiser salvar também o número do WhatsApp e mensagem, você pode criar uma tabela pra isso
-        // ou persistir em outro local. Aqui estamos só imprimindo por enquanto.
-        System.out.println("Número do WhatsApp: " + botConfig.getWhatsappNumber());
-        System.out.println("Mensagem de Saudação: " + botConfig.getGreetingMessage());
+        Optional<BotConfig> optionalConfig = botConfigRepository.findAll().stream().findFirst();
+
+        BotConfig config = optionalConfig.orElse(new BotConfig());
+        config.setWhatsappNumber(botConfigDTO.getWhatsappNumber());
+        config.setGreetingMessage(botConfigDTO.getGreetingMessage());
+
+        botConfigRepository.save(config);
 
         return ResponseEntity.ok("Configurações salvas com sucesso!");
     }
@@ -67,11 +92,15 @@ public class BotController {
             return dto;
         }).collect(Collectors.toList());
 
-        BotConfigDTO config = new BotConfigDTO();
-        config.setIntents(intentDTOs);
-        config.setWhatsappNumber("+5511999999999"); // 🔧 Substituir com valor real (se estiver em outro lugar)
-        config.setGreetingMessage("Olá! Como posso te ajudar hoje?"); // 🔧 Substituir com valor real
+        Optional<BotConfig> optionalConfig = botConfigRepository.findAll().stream().findFirst();
 
-        return config;
+        BotConfig config = optionalConfig.orElse(new BotConfig());
+
+        BotConfigDTO dto = new BotConfigDTO();
+        dto.setIntents(intentDTOs);
+        dto.setWhatsappNumber(config.getWhatsappNumber());
+        dto.setGreetingMessage(config.getGreetingMessage());
+
+        return dto;
     }
 }
